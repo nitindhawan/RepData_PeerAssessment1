@@ -7,14 +7,15 @@ This assignment makes use of data from a personal activity monitoring device. Th
 
 This assignment requires activity.zip file which can be downloaded from [this location](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip).  
 We first unzip the file and extract the activity.csv file.  
+We will convert the date column to date object.
 Then let us take a look at the structure of the csv by using the head function and the summary function.
 
 ```{r}
 unzip("activity.zip");
 activity<-read.csv("activity.csv");
+activity$date <- as.Date(activity$date);
 head(activity);
 summary(activity);
-activity$date <- as.Date(activity$date);
 ```
 
 
@@ -32,6 +33,8 @@ Now we will take a mean and median of the resulting data.
 ```{r}
 activityMean <- mean(activityByDate$steps);
 activityMedian <- median(activityByDate$steps);
+activityMean
+activityMedian
 ```
 
 Mean of total number of steps taken each day is **`r activityMean` steps**.  
@@ -50,21 +53,29 @@ Next, we will use the *which* function to find out which daily interval contains
 
 ```{r}
 maxSteps <- max(activityByInterval$steps);
-maxStepsInterval <- activityByInterval[which(activityByInterval$steps == maxSteps), 1];
+maxSteps
+maxStepsInterval <- activityByInterval$interval[which(activityByInterval$steps == maxSteps)];
+maxStepsInterval
 ```
 
 The daily interval containing maximum number of mean steps (**`r maxSteps` steps**) is **Interval  `r maxStepsInterval`**.
 
 ## Imputing missing values
-First we will find all missing values using *which* function.  
-
+First, we will find all missing values using *which* function.  
 ```{r}
 missingIndex <- which(is.na(activity$steps));
 missingCount <- nrow(as.array(missingIndex));
+missingCount
 ```
 
-**We find that `r missingCount` values are missing.**  
-  
+**We find that `r missingCount` values are missing.**    
+Now, we will quickly draw a scatterplot (interval vs date) to see if there is any pattern in missing values.  
+
+```{r}
+qplot(date, interval, data=activity[missingIndex, ], main="Missing Interval scatterplot", ylab="Missing Intervals");
+```
+
+It seems like data is missing for few complete days.
 Next we will replace those missing values by the mean steps of that interval. We have these already calculated in the **activityByInterval**.  
   
 Lets call the new data frame as filledActivity.
@@ -86,19 +97,32 @@ filledActivityByDate <- aggregate(steps ~ date, data = filledActivity, sum);
 hist(filledActivityByDate$steps, col="red", main="Histogram of total steps taken daily (filled)", xlab="Total steps taken daily (filled)");
 filledActivityMean <- mean(filledActivityByDate$steps);
 filledActivityMedian <- median(filledActivityByDate$steps);
+filledActivityMean
+filledActivityMedian
 ```
 
 New Mean of total number of steps taken each day is **`r filledActivityMean` steps** vs Old Mean **`r activityMean` steps**.  
-New Median of total number of steps taken each day is **`r filledActivityMedian` steps** vs Old Median **`r activityMean` steps**.  
-**There is no material difference in mean and median of the steps taken per day.** This is because the missing data was missing for the full days. And when the data was filled with means across days, there was no impact. This can be verified by the following scatterplot for date-interval patterns in missing values.  
-```{r}
-qplot(date, interval, data=activity[missingIndex, ])
-```
+New Median of total number of steps taken each day is **`r filledActivityMedian` steps** vs Old Median **`r activityMedian` steps**.  
+  
+  
+**There was no difference in mean of the total steps taken per day.** This is because the missing data was missing for a few complete days. And we filled the missing data with means across days. Hence there was no impact on the mean.  
+However, **the median was shifted** due to more **mean** values being inserted.
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-
+We will first add a **weekday** column, whose value will be *weekday* for weekdays, and *weekend* for weekends.  
+And compute the mean of steps by interval and weekday.  
 ```{r}
-filledActivity$day <- weekdays(filledActivity$date);
-#qplot(interval, steps, data=filledActivity, facets=steps ~ day);
+filledActivity$weekday <- weekdays(filledActivity$date);
+filledActivity$weekday[filledActivity$weekday == "Sunday"] <- "weekend";
+filledActivity$weekday[filledActivity$weekday == "Saturday"] <- "weekend";
+filledActivity$weekday[filledActivity$weekday != "weekend"] <- "weekday";
+
+filledActivityByWeekday<- aggregate(steps ~ interval + weekday, data=filledActivity, mean);
+```
+
+Next we will plot a line plot between with interval as x-axis and steps as y-axis and use weekday column as a facet.  
+```{r}
+qplot(interval, steps, data=filledActivityByWeekday, facets=weekday~., geom=c("line"), ylab="Number of steps");
 ```

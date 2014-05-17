@@ -7,12 +7,14 @@ This assignment makes use of data from a personal activity monitoring device. Th
 
 This assignment requires activity.zip file which can be downloaded from [this location](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip).  
 We first unzip the file and extract the activity.csv file.  
+We will convert the date column to date object.
 Then let us take a look at the structure of the csv by using the head function and the summary function.
 
 
 ```r
 unzip("activity.zip")
 activity <- read.csv("activity.csv")
+activity$date <- as.Date(activity$date)
 head(activity)
 ```
 
@@ -31,18 +33,14 @@ summary(activity)
 ```
 
 ```
-##      steps               date          interval   
-##  Min.   :  0.0   2012-10-01:  288   Min.   :   0  
-##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589  
-##  Median :  0.0   2012-10-03:  288   Median :1178  
-##  Mean   : 37.4   2012-10-04:  288   Mean   :1178  
-##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766  
-##  Max.   :806.0   2012-10-06:  288   Max.   :2355  
-##  NA's   :2304    (Other)   :15840
-```
-
-```r
-activity$date <- as.Date(activity$date)
+##      steps            date               interval   
+##  Min.   :  0.0   Min.   :2012-10-01   Min.   :   0  
+##  1st Qu.:  0.0   1st Qu.:2012-10-16   1st Qu.: 589  
+##  Median :  0.0   Median :2012-10-31   Median :1178  
+##  Mean   : 37.4   Mean   :2012-10-31   Mean   :1178  
+##  3rd Qu.: 12.0   3rd Qu.:2012-11-15   3rd Qu.:1766  
+##  Max.   :806.0   Max.   :2012-11-30   Max.   :2355  
+##  NA's   :2304
 ```
 
 
@@ -69,6 +67,19 @@ Now we will take a mean and median of the resulting data.
 ```r
 activityMean <- mean(activityByDate$steps)
 activityMedian <- median(activityByDate$steps)
+activityMean
+```
+
+```
+## [1] 10766
+```
+
+```r
+activityMedian
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -94,25 +105,53 @@ Next, we will use the *which* function to find out which daily interval contains
 
 ```r
 maxSteps <- max(activityByInterval$steps)
-maxStepsInterval <- activityByInterval[which(activityByInterval$steps == maxSteps), 
-    1]
+maxSteps
+```
+
+```
+## [1] 206.2
+```
+
+```r
+maxStepsInterval <- activityByInterval$interval[which(activityByInterval$steps == 
+    maxSteps)]
+maxStepsInterval
+```
+
+```
+## [1] 835
 ```
 
 
 The daily interval containing maximum number of mean steps (**206.1698 steps**) is **Interval  835**.
 
 ## Imputing missing values
-First we will find all missing values using *which* function.  
-
+First, we will find all missing values using *which* function.  
 
 ```r
 missingIndex <- which(is.na(activity$steps))
 missingCount <- nrow(as.array(missingIndex))
+missingCount
+```
+
+```
+## [1] 2304
 ```
 
 
-**We find that 2304 values are missing.**  
-  
+**We find that 2304 values are missing.**    
+Now, we will quickly draw a scatterplot (interval vs date) to see if there is any pattern in missing values.  
+
+
+```r
+qplot(date, interval, data = activity[missingIndex, ], main = "Missing Interval scatterplot", 
+    ylab = "Missing Intervals")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+
+It seems like data is missing for few complete days.
 Next we will replace those missing values by the mean steps of that interval. We have these already calculated in the **activityByInterval**.  
   
 Lets call the new data frame as filledActivity.
@@ -139,40 +178,57 @@ hist(filledActivityByDate$steps, col = "red", main = "Histogram of total steps t
     xlab = "Total steps taken daily (filled)")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
 
 ```r
 filledActivityMean <- mean(filledActivityByDate$steps)
 filledActivityMedian <- median(filledActivityByDate$steps)
+filledActivityMean
+```
+
+```
+## [1] 10766
+```
+
+```r
+filledActivityMedian
+```
+
+```
+## [1] 10766
 ```
 
 
 New Mean of total number of steps taken each day is **1.0766 &times; 10<sup>4</sup> steps** vs Old Mean **1.0766 &times; 10<sup>4</sup> steps**.  
-New Median of total number of steps taken each day is **1.0766 &times; 10<sup>4</sup> steps** vs Old Median **1.0766 &times; 10<sup>4</sup> steps**.  
-**There is no material difference in mean and median of the steps taken per day.** This is because the missing data was missing for the full days. And when the data was filled with means across days, there was no impact. This can be verified by the following scatterplot for date-interval patterns in missing values.  
-
-```r
-qplot(date, interval, data = activity[missingIndex, ])
-```
-
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+New Median of total number of steps taken each day is **1.0766 &times; 10<sup>4</sup> steps** vs Old Median **10765 steps**.  
+  
+  
+**There was no difference in mean of the total steps taken per day.** This is because the missing data was missing for a few complete days. And we filled the missing data with means across days. Hence there was no impact on the mean.  
+However, **the median was shifted** due to more **mean** values being inserted.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-
-
-```r
-filledActivity$day <- weekdays
-```
-
-```
-## Error: attempt to replicate an object of type 'closure'
-```
+We will first add a **weekday** column, whose value will be *weekday* for weekdays, and *weekend* for weekends.  
+And compute the mean of steps by interval and weekday.  
 
 ```r
-qplot(interval, steps, data = filledActivity)
+filledActivity$weekday <- weekdays(filledActivity$date)
+filledActivity$weekday[filledActivity$weekday == "Sunday"] <- "weekend"
+filledActivity$weekday[filledActivity$weekday == "Saturday"] <- "weekend"
+filledActivity$weekday[filledActivity$weekday != "weekend"] <- "weekday"
+
+filledActivityByWeekday <- aggregate(steps ~ interval + weekday, data = filledActivity, 
+    mean)
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11.png) 
+
+Next we will plot a line plot between with interval as x-axis and steps as y-axis and use weekday column as a facet.  
+
+```r
+qplot(interval, steps, data = filledActivityByWeekday, facets = weekday ~ ., 
+    geom = c("line"), ylab = "Number of steps")
+```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
 
