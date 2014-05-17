@@ -239,3 +239,8 @@ qplot(interval, steps, data = filledActivityByWeekday, facets = weekday ~ .,
 
 ![plot of chunk qplot2](figure/qplot2.png) 
 
+
+### Yes, there is visible difference between weekday and weekend activity patterns. Specifically, following are the more observable points of difference:
+1. During weekends, **activity is lower** during 0500 hours to 1000 hours
+2. During weekends, **activity is higher** during 1000 hours to 1500 hours
+3. During weekends, **activity is higher** during 1500 hours to 2000 hours
