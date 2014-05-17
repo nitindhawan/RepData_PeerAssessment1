@@ -14,6 +14,7 @@ unzip("activity.zip");
 activity<-read.csv("activity.csv");
 head(activity);
 summary(activity);
+activity$date <- as.Date(activity$date);
 ```
 
 
@@ -25,7 +26,7 @@ activityByDate <- aggregate(steps ~ date, data = activity, sum);
 ```
 First, we will make a histogram of the total number of steps taken each day.  
 ```{r}
-hist(activityByDate$steps, col="red", main="Histogram of total steps taken daily", xlab="total steps taken daily");
+hist(activityByDate$steps, col="red", main="Histogram of total steps taken daily", xlab="Total steps taken daily");
 ```
 Now we will take a mean and median of the resulting data.
 ```{r}
@@ -70,9 +71,34 @@ Lets call the new data frame as filledActivity.
 
 ```{r}
 filledActivity <- activity;
-#filledActivity$steps[missingIndex] <- activityByInterval[filledActivity$
+for(i in missingIndex){
+        filledActivity$steps[i] <- activityByInterval$steps[activityByInterval$interval == filledActivity$interval[i]];
+}
 ```
 
+Now, we will redo the following  
+1. Aggregation by day  
+2. Histogram by day  
+3. Mean and Median  
+
+```{r}
+filledActivityByDate <- aggregate(steps ~ date, data = filledActivity, sum);
+hist(filledActivityByDate$steps, col="red", main="Histogram of total steps taken daily (filled)", xlab="Total steps taken daily (filled)");
+filledActivityMean <- mean(filledActivityByDate$steps);
+filledActivityMedian <- median(filledActivityByDate$steps);
+```
+
+New Mean of total number of steps taken each day is **`r filledActivityMean` steps** vs Old Mean **`r activityMean` steps**.  
+New Median of total number of steps taken each day is **`r filledActivityMedian` steps** vs Old Median **`r activityMean` steps**.  
+**There is no material difference in mean and median of the steps taken per day.** This is because the missing data was missing for the full days. And when the data was filled with means across days, there was no impact. This can be verified by the following scatterplot for date-interval patterns in missing values.  
+```{r}
+qplot(date, interval, data=activity[missingIndex, ])
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+
+```{r}
+filledActivity$day <- weekdays(filledActivity$date);
+#qplot(interval, steps, data=filledActivity, facets=steps ~ day);
+```
