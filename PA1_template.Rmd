@@ -10,7 +10,7 @@ We first unzip the file and extract the activity.csv file.
 We will convert the date column to date object.
 Then let us take a look at the structure of the csv by using the head function and the summary function.
 
-```{r}
+```{r load}
 unzip("activity.zip");
 activity<-read.csv("activity.csv");
 activity$date <- as.Date(activity$date);
@@ -26,7 +26,7 @@ _Please note that NAs are automatically removed by using aggregate function in t
 activityByDate <- aggregate(steps ~ date, data = activity, sum);
 ```
 First, we will make a histogram of the total number of steps taken each day.  
-```{r}
+```{r hist1}
 hist(activityByDate$steps, col="red", main="Histogram of total steps taken daily", xlab="Total steps taken daily");
 ```
 Now we will take a mean and median of the resulting data.
@@ -43,7 +43,7 @@ Median of total number of steps taken each day is **`r activityMedian` steps**.
 ## What is the average daily activity pattern?
 For this question, we will first take mean of steps by interval.  
 Then we will use the *qplot* from *ggplot2* library to draw a *linegraph* of mean steps by interval.  
-```{r}
+```{r qplot1}
 activityByInterval <- aggregate(steps ~ interval, data = activity, mean);
 library(ggplot2);
 qplot(interval, steps, data=activityByInterval, geom=c("line"), main="Mean daily steps by interval", ylab="Mean Steps");
@@ -71,7 +71,7 @@ missingCount
 **We find that `r missingCount` values are missing.**    
 Now, we will quickly draw a scatterplot (interval vs date) to see if there is any pattern in missing values.  
 
-```{r}
+```{r scatterplot1}
 qplot(date, interval, data=activity[missingIndex, ], main="Missing Interval scatterplot", ylab="Missing Intervals");
 ```
 
@@ -92,7 +92,7 @@ Now, we will redo the following
 2. Histogram by day  
 3. Mean and Median  
 
-```{r}
+```{r hist2}
 filledActivityByDate <- aggregate(steps ~ date, data = filledActivity, sum);
 hist(filledActivityByDate$steps, col="red", main="Histogram of total steps taken daily (filled)", xlab="Total steps taken daily (filled)");
 filledActivityMean <- mean(filledActivityByDate$steps);
@@ -123,6 +123,6 @@ filledActivityByWeekday<- aggregate(steps ~ interval + weekday, data=filledActiv
 ```
 
 Next we will plot a line plot between with interval as x-axis and steps as y-axis and use weekday column as a facet.  
-```{r}
+```{r qplot2}
 qplot(interval, steps, data=filledActivityByWeekday, facets=weekday~., geom=c("line"), ylab="Number of steps");
 ```

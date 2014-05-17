@@ -60,7 +60,7 @@ hist(activityByDate$steps, col = "red", main = "Histogram of total steps taken d
     xlab = "Total steps taken daily")
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+![plot of chunk hist1](figure/hist1.png) 
 
 Now we will take a mean and median of the resulting data.
 
@@ -97,7 +97,7 @@ qplot(interval, steps, data = activityByInterval, geom = c("line"), main = "Mean
     ylab = "Mean Steps")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+![plot of chunk qplot1](figure/qplot1.png) 
 
 
 Next, we will use the *which* function to find out which daily interval contains the maximum of mean steps.
@@ -148,7 +148,7 @@ qplot(date, interval, data = activity[missingIndex, ], main = "Missing Interval 
     ylab = "Missing Intervals")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+![plot of chunk scatterplot1](figure/scatterplot1.png) 
 
 
 It seems like data is missing for few complete days.
@@ -178,7 +178,7 @@ hist(filledActivityByDate$steps, col = "red", main = "Histogram of total steps t
     xlab = "Total steps taken daily (filled)")
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+![plot of chunk hist2](figure/hist2.png) 
 
 ```r
 filledActivityMean <- mean(filledActivityByDate$steps)
@@ -230,5 +230,5 @@ qplot(interval, steps, data = filledActivityByWeekday, facets = weekday ~ .,
     geom = c("line"), ylab = "Number of steps")
 ```
 
-![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
+![plot of chunk qplot2](figure/qplot2.png) 
 
