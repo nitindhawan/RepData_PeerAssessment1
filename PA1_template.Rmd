@@ -49,11 +49,15 @@ library(ggplot2);
 qplot(interval, steps, data=activityByInterval, geom=c("line"), main="Mean daily steps by interval", ylab="Mean Steps");
 ```
 
-Next, we will use the *which* function to find out which daily interval contains the maximum of mean steps.
-
+Now, we will find out the maximum number of mean steps in any interval.  
 ```{r}
 maxSteps <- max(activityByInterval$steps);
 maxSteps
+```
+
+Next, we will use the *which* function to find out which daily interval contains the maximum of mean steps.
+
+```{r}
 maxStepsInterval <- activityByInterval$interval[which(activityByInterval$steps == maxSteps)];
 maxStepsInterval
 ```
@@ -61,6 +65,7 @@ maxStepsInterval
 The daily interval containing maximum number of mean steps (**`r maxSteps` steps**) is **Interval  `r maxStepsInterval`**.
 
 ## Imputing missing values
+### Imputing strategy research
 First, we will find all missing values using *which* function.  
 ```{r}
 missingIndex <- which(is.na(activity$steps));
@@ -75,9 +80,11 @@ Now, we will quickly draw a scatterplot (interval vs date) to see if there is an
 qplot(date, interval, data=activity[missingIndex, ], main="Missing Interval scatterplot", ylab="Missing Intervals");
 ```
 
-It seems like data is missing for few complete days.
-Next we will replace those missing values by the mean steps of that interval. We have these already calculated in the **activityByInterval**.  
+It seems like data is missing for few complete days.  
+## Imputing Strategy
+### We will replace the *missing values* by the *mean steps* of the corresponding interval. We have these already calculated in the *activityByInterval*.  
   
+### Imputation Code
 Lets call the new data frame as filledActivity.
 
 ```{r}
@@ -92,6 +99,7 @@ Now, we will redo the following
 2. Histogram by day  
 3. Mean and Median  
 
+## Histogram (after the filled values)
 ```{r hist2}
 filledActivityByDate <- aggregate(steps ~ date, data = filledActivity, sum);
 hist(filledActivityByDate$steps, col="red", main="Histogram of total steps taken daily (filled)", xlab="Total steps taken daily (filled)");

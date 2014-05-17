@@ -100,8 +100,7 @@ qplot(interval, steps, data = activityByInterval, geom = c("line"), main = "Mean
 ![plot of chunk qplot1](figure/qplot1.png) 
 
 
-Next, we will use the *which* function to find out which daily interval contains the maximum of mean steps.
-
+Now, we will find out the maximum number of mean steps in any interval.  
 
 ```r
 maxSteps <- max(activityByInterval$steps)
@@ -111,6 +110,10 @@ maxSteps
 ```
 ## [1] 206.2
 ```
+
+
+Next, we will use the *which* function to find out which daily interval contains the maximum of mean steps.
+
 
 ```r
 maxStepsInterval <- activityByInterval$interval[which(activityByInterval$steps == 
@@ -126,6 +129,7 @@ maxStepsInterval
 The daily interval containing maximum number of mean steps (**206.1698 steps**) is **Interval  835**.
 
 ## Imputing missing values
+### Imputing strategy research
 First, we will find all missing values using *which* function.  
 
 ```r
@@ -151,9 +155,11 @@ qplot(date, interval, data = activity[missingIndex, ], main = "Missing Interval 
 ![plot of chunk scatterplot1](figure/scatterplot1.png) 
 
 
-It seems like data is missing for few complete days.
-Next we will replace those missing values by the mean steps of that interval. We have these already calculated in the **activityByInterval**.  
+It seems like data is missing for few complete days.  
+## Imputing Strategy
+### We will replace the *missing values* by the *mean steps* of the corresponding interval. We have these already calculated in the *activityByInterval*.  
   
+### Imputation Code
 Lets call the new data frame as filledActivity.
 
 
@@ -171,6 +177,7 @@ Now, we will redo the following
 2. Histogram by day  
 3. Mean and Median  
 
+## Histogram (after the filled values)
 
 ```r
 filledActivityByDate <- aggregate(steps ~ date, data = filledActivity, sum)
